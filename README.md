@@ -21,12 +21,12 @@ we want to keep track of the max value at each level of resolutions (year, month
 from mrsketch import Graph, StateDescriptor
 
 max_state = StateDescriptor(
-    constructor=lambda: [0], # mutable list to keep track of max
-    updater=lambda x, state: state[0] = max(state[0], x[3]) # update the max by comparing with new record's value, 
-    merger=lambda state1, state2: max(state1[0] + state2[0]) # the max of two max,
-    serializer=lambda state: repr(state[0]) # python's repr,
-    deserializer=lambda x: [eval(x)] # reconstruct the state from input string
-    extractor=lambda x: x[0] # when calling get(), we don't want to get the list, just the max
+    constructor=lambda: [0],                                   # mutable list to keep track of max
+    updater=lambda x, state: state[0] = max(state[0], x[3]),   # update the max by comparing with new record's value
+    merger=lambda state1, state2: [max(state1[0] + state2[0])],# the max of two max as a new state
+    serializer=lambda state: repr(state[0]),                   # python's repr
+    deserializer=lambda x: [eval(x)],                          # reconstruct the state from input string
+    extractor=lambda x: x[0]                                   # when get(), extract the max from the list (state)
 )
 ```
 
