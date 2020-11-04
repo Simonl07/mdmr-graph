@@ -18,6 +18,8 @@ Assuming we have a dataset/stream that contains [Year, Month, Day, Value] for ea
 Lets keeps track of the max value at each level of resolutions (year, month, and day levels)
 
 ```python
+from mrsketch import Graph, StateDescriptor
+
 max_state = StateDescriptor(
     constructor=lambda: [0], # mutable list to keep track of max
     updater=lambda x, state: state[0] = max(state[0], x[3]) # update the max by comparing with new record's value, 
@@ -46,9 +48,9 @@ g = Graph(
     state_descriptors={
         'max': max_state
     },
-    path_extractor=lambda x: NDPath({
-        'time': Path(list(x[:3])),
-    })
+    path_extractor=lambda x: {
+        'time': list(x[:3]),
+    }
 )
 ```
 
@@ -57,7 +59,6 @@ The path_extractor is a function that takes a record as input and returns a NDPa
 In this example the path along the `time` dimension is extracted by slicing the first three items in each record
 
 This tells the graph how the hierarchical data can be extracted from a given record
-
 
 now lets push some records into the graph:
 ```python
@@ -75,4 +76,21 @@ g.get({'time': [2020]}) # -> 10
 ```
 
 
+## Design & Documentation
 
+__Path__: Path represents a sequence of values along a specific hierarchical tree of resolution: Jun 16th, 2017 can be encoded as [2017,6,16], where indices encodes the level of hierarchy (2017 - top/root level, 16 - lowest/leaf level), and every next index is the child of (or nested in) the previous index. Geohash 8ygzq can be encoded as [8, y, g, z, q]
+
+
+__NDPath__: N-dimensional path. A mapping of dimension names to __Path__.
+A __Path__ only describes the path along a single dimension, the graph supports arbitrary number of multi-resolution dimensions:
+```python
+g = Graph(
+    state_descriptors={
+        'max': max_state
+    },
+    path_extractor=lambda x: {
+        'time': list(x[:3]),
+        'geohash': list(x[3:10]) # <- add arbitrary dimensions as long as its 
+    }                             # hierarchy (path) can be extracted from the records
+)
+```
