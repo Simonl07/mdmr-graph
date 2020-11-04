@@ -1,10 +1,8 @@
 # MRSketch
 
-A simple multi-resolution graph for building stream sketches
+A simple multi-resolution graph for building sketches on multi-level data: Stream Statistics & Online ML
 
 Supports arbitrary number of dimensions, levels of resolution, and node states
-
-Useful for building sketches on multi-level data: Stream Statistics & Online ML
 
 # Install
 ```
