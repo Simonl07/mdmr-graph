@@ -15,7 +15,7 @@ First, define the individual states that need to be stored at each resolution by
 
 Assuming we have a dataset/stream that contains [Year, Month, Day, Value] for each record
 
-Lets keeps track of the max value at each level of resolutions (year, month, and day levels)
+we want to keep track of the max value at each level of resolutions (year, month, and day levels)
 
 ```python
 from mrsketch import Graph, StateDescriptor
