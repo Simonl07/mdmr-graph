@@ -94,3 +94,5 @@ g = Graph(
     }                             # hierarchy (path) can be extracted from the records
 )
 ```
+
+__Graph__: A Directed Acyclic Graph where node is identified by an NDPath describing its coordinates among N dimensions. The node manages arbitrary amount of states described by the graph state_descriptors. A node points to other child nodes with NDPath that overlapse with itself and extend by 1 level of resolution in any dimension. So `time=2018/1/1, geohash=abc` is a children of `time=2018/1, geohash=abc`, but not a children of `time=2019/1, geohash=abc`
