@@ -1,6 +1,6 @@
 # MRSketch
 
-A simple multi-resolution graph for building sketches on multi-level data: Stream Statistics & Online ML
+Simple library for building multi-resolution sketches: Multi-level streaming statistics & Multi-level online machine learning
 
 Supports arbitrary number of dimensions, levels of resolution, and node states
 
