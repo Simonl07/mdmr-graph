@@ -4,12 +4,12 @@ Simple library for building multi-resolution sketches: Multi-level streaming sta
 
 Supports arbitrary number of dimensions, levels of resolution, and node states
 
-# Install
+## Install
 ```
 pip install mrsketch
 ```
 
-# Quick Start
+## Quick Start
 
 First, define the individual states that need to be stored at each resolution by specifying these functions to a state descriptor: 
 
