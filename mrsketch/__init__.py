@@ -70,9 +70,6 @@ class Path(object):
     def __eq__(self, other):
         return self.values == other.values
 
-    def to_tuple(self):
-        return tuple(self.values)
-
 
 class NDPath(object):
     '''
@@ -128,13 +125,13 @@ class NDPath(object):
     def __hash__(self):
         return hash(str(self))
 
-    def to_tuple(self):
-        return tuple((name, path.to_tuple()) for name, path in self.paths.items())
+    def to_hex(self):
+        return pickle.dumps([(name, path) for name, path in self.paths.items()]).hex()
 
-    def from_tuple(tuples):
+    def from_hex(hex):
         paths = {}
-        for t in tuples:
-            paths[t[0]] = Path(t[1])
+        for t in pickle.loads(bytes.fromhex(hex)):
+            paths[t[0]] = t[1]
         return NDPath(paths)
 
 
@@ -142,7 +139,10 @@ class Graph(object):
 
     def __init__(self, state_descriptors, path_extractor):
         self.adjlist = {}
-        self.path_extractor = path_extractor
+        self.path_extractor = lambda x: NDPath({
+			key: Path(value)
+			for key, value in path_extractor(x).items()
+		})
         self.state_descriptors = state_descriptors
         self.lock = threading.Lock()
         self.size = 0
@@ -223,11 +223,13 @@ class Graph(object):
 
 
     def get(self, ndpath):
+        ndpath = NDPath({
+            key: Path(value)
+            for key, value in ndpath.items()
+        })
+
         if len(ndpath) == 0:
             return self.combinedstate([node for ndpath, node in self.adjlist.items() if len(ndpath) == 1])
-
-        print(ndpath)
-        print(self.adjlist.keys())
 
         if ndpath in self.adjlist:
             return [self.state_descriptors[name].extractor(state) for name, state in self.adjlist[ndpath].states.items()]
@@ -276,16 +278,18 @@ class Graph(object):
             raise BaseException(f'{encoding} is not a valid encoding option (options: json, pickle)')
 
         output = {}
-
+        self.lock.acquire()
         for ndpath, node in self.adjlist.items():
+            node.lock.acquire()
             encoded_node_states = {}
             for name, state in node.states.items():
                 encoded_node_states[name] = self.state_descriptors[name].serializer(state)
             encoded_children = []
             for children in node.children:
-                encoded_children.append(str(children.to_tuple()))
-            output[str(ndpath.to_tuple())] = (encoded_node_states, encoded_children)
-
+                encoded_children.append(children.to_hex())
+            node.lock.release()
+            output[ndpath.to_hex()] = (encoded_node_states, encoded_children)
+        self.lock.release()
         return supported_graph_serialization[encoding].dumps(output, indent=4)
 
     def from_serialization(self, bytes, encoding='json'):
@@ -293,12 +297,15 @@ class Graph(object):
             raise BaseException(f'{encoding} is not a valid encoding option (options: json, pickle)')
 
         tuple_dict = supported_graph_serialization[encoding].loads(bytes)
-        for ndpath_tuple, encoded_node_states in tuple_dict.items():
-            ndpath = NDPath.from_tuple(eval(ndpath_tuple))
+        self.lock.acquire()
+        for ndpath_hex, encoded_node in tuple_dict.items():
+            ndpath = NDPath.from_hex(ndpath_hex)
             self.adjlist[ndpath] = self.__newnode()
+            self.adjlist[ndpath].lock.acquire()
             self.adjlist[ndpath].states = {
                 name: self.state_descriptors[name].deserializer(encoded_state)
-                for name, encoded_state in encoded_node_states.items()
+                for name, encoded_state in encoded_node[0].items()
             }
-
-            self.children
+            self.adjlist[ndpath].children = [NDPath.from_hex(c) for c in encoded_node[1]]
+            self.adjlist[ndpath].lock.release()
+        self.lock.release()

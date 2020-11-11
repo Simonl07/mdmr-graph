@@ -4,3 +4,4 @@ mdmr_graph.egg-info
 mrsketch/test.py
 mrsketch/__pycache__
 mrsketch.egg-info
+graph.csv
