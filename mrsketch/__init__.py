@@ -68,7 +68,7 @@ class Path(object):
         return hash(self.pathstring())
 
     def __eq__(self, other):
-        return self.values == other.values
+        return all([self[i] == None or self[i] == other[i] for i in range(len(other))])
 
 
 class NDPath(object):
@@ -140,9 +140,9 @@ class Graph(object):
     def __init__(self, state_descriptors, path_extractor):
         self.adjlist = {}
         self.path_extractor = lambda x: NDPath({
-			key: Path(value)
-			for key, value in path_extractor(x).items()
-		})
+            key: Path(value)
+            for key, value in path_extractor(x).items()
+        })
         self.state_descriptors = state_descriptors
         self.lock = threading.Lock()
         self.size = 0
@@ -234,6 +234,7 @@ class Graph(object):
         if ndpath in self.adjlist:
             return [self.state_descriptors[name].extractor(state) for name, state in self.adjlist[ndpath].states.items()]
 
+        return [sd.constructor() for sd in self.state_descriptors.values()]
 
     def edges(self):
         output = []

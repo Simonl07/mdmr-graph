@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='mrsketch',
-    version='0.0.1',
+    version='0.0.3',
     description='Simple library for building multi-dimensional multi-resolution sketches',
     url='https://github.com/Simonl07/mrsketch',
     author='Simon Lu',
