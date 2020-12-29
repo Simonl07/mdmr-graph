@@ -218,7 +218,7 @@ class Graph(object):
         # reduce by states
         # Note: At this point states can still be mutated
         for name, availiable_states in states.items():
-            states[name] = self.state_descriptors[name].extractor(reduce(self.state_descriptors[name].merger, availiable_states))
+            states[name] = reduce(self.state_descriptors[name].merger, availiable_states)
         return states
 
 
@@ -232,9 +232,9 @@ class Graph(object):
             return self.combinedstate([node for ndpath, node in self.adjlist.items() if len(ndpath) == 1])
 
         if ndpath in self.adjlist:
-            return [self.state_descriptors[name].extractor(state) for name, state in self.adjlist[ndpath].states.items()]
+            return {name: self.state_descriptors[name].extractor(state) for name, state in self.adjlist[ndpath].states.items()}
 
-        return [sd.constructor() for sd in self.state_descriptors.values()]
+        return {name: sd.constructor() for name, sd in self.state_descriptors.items()}
 
     def edges(self):
         output = []
