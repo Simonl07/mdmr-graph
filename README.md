@@ -96,3 +96,12 @@ g = Graph(
 ```
 
 __Graph__: A Directed Acyclic Graph where node is identified by an NDPath describing its coordinates among N dimensions. The node manages arbitrary amount of states described by the graph state_descriptors. A node points to other child nodes with NDPath that overlapse with itself and extend by 1 level of resolution in any dimension. So `time=2018/1/1, geohash=abc` is a children of `time=2018/1, geohash=abc`, but not a children of `time=2019/1, geohash=abc`
+
+
+__Portability__: The (de)serializer functions specified in state descriptors are intented to be used by the graph to produce a serialized byte sequence that snapshots the entire state. 
+The serialized bytes in the form of json or pickle can then be sent over the network and restored into memory.
+
+__Thread safety__: Concurrent read/write are protected by read/write locks within each node. This improves concurrency by allowing writes to different region in the graph. 
+
+
+
